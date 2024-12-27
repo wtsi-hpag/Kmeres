@@ -4,7 +4,7 @@ Kmeres - Identification of Centromeres and Telomeres using Kmer Profiles
 ### Download and Compile:
 
     $ git clone  https://github.com/wtsi-hpag/Kmeres.git 
-    $ cd kmeres 
+    $ cd Kmeres 
     $ make
 		
 ### Run the pipelines
