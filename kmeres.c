@@ -1,10 +1,10 @@
 /***********************************************************************\
  *                                                                     * 
- *                        PROJECT        Kmere                         *
+ *                        PROJECT        Kmeres                        *
  *                                                                     * 
  *---------------------------------------------------------------------*
  *                                                                     * 
- *        Kmere - Identification of Centromere and Telomere            * 
+ *        Kmeres - Identification of Centromere and Telomere            * 
  *                       using Kmer Profiles                           *
  *                                                                     *
  *                                By                                   *
