@@ -1,10 +1,10 @@
 /***********************************************************************\
  *                                                                     * 
- *                        PROJECT        Kmeres                        *
+ *                        PROJECT        Kmere                         *
  *                                                                     * 
  *---------------------------------------------------------------------*
  *                                                                     * 
- *        Kmeres - Identification of Centromere and Telomere            * 
+ *        Kmere - Identification of Centromere and Telomere            * 
  *                       using Kmer Profiles                           *
  *                                                                     *
  *                                By                                   *
@@ -61,6 +61,7 @@ static char Plot_Name[50];
 static char *SCGname=NULL;//SingleCopyGenome
 static B64_long baseSize;
 static double set_rate = 10.0;
+static double set_rate2 = 3.0;
 static int n_step = 0;
 static int n_pixel = 32768;
 static int n_pixlen = 94000;
@@ -238,8 +239,9 @@ void Hash_Process(int nRead,int SEG_LEN, char **argv, int argc, int args)
      int nshift; 
      int cover_avechr; 
      int n_meres,*chr_index,*chr_idpix,*chr_locus,*chr_drate;
+     int n_meres2,*chr_index2,*chr_idpix2,*chr_locus2;
      void Plot_Process(char **argv, int argc, int args);
-     void Out_Meres(fasta *seq,int nSeq,int n_meres,int *chr_index,int *chr_idpix,int *chr_locus,char **argv,int argc,int args);
+     void Out_Meres(fasta *seq,int nSeq,int n_meres,int n_meres2,int *chr_index,int *chr_idpix,int *chr_locus,int *chr_index2,int *chr_idpix2,int *chr_locus2,char **argv,int argc,int args);
      void ArraySort_Int2(int n, int *arr, int *brr);
      B64_long offset,sizesm,dsize_4;
      int stopflag,num_copy,m,n;
@@ -699,6 +701,21 @@ void Hash_Process(int nRead,int SEG_LEN, char **argv, int argc, int args)
        printf("phusion: calloc - chr_index\n");
        exit(1);
      }
+     if((chr_index2 = (int *)calloc(n_pixel,sizeof(int))) == NULL)
+     {
+       printf("phusion: calloc - chr_index\n");
+       exit(1);
+     }
+     if((chr_idpix2 = (int *)calloc(n_pixel,sizeof(int))) == NULL)
+     {
+       printf("phusion: calloc - chr_index\n");
+       exit(1);
+     }
+     if((chr_locus2 = (int *)calloc(n_pixel,sizeof(int))) == NULL)
+     {
+       printf("phusion: calloc - chr_index\n");
+       exit(1);
+     }
      if((chr_drate = (int *)calloc(n_pixel,sizeof(int))) == NULL)
      {
        printf("phusion: calloc - chr_index\n");
@@ -870,6 +887,7 @@ void Hash_Process(int nRead,int SEG_LEN, char **argv, int argc, int args)
      }
      n_pix = 0;
      n_meres = 0;
+     n_meres2 = 0;
      for(j=0;j<nSeq;j++)
      { 
 	int idd = ctg_list[j];
@@ -889,13 +907,23 @@ void Hash_Process(int nRead,int SEG_LEN, char **argv, int argc, int args)
 	   dimpix = dimpix/max_cover;
            printf("Chr-Denoise: %ld %ld %d %lf || %lf %f %lf || %d %lf %ld\n",j+1,n_pix+i,idt,cover_pix[n_pix+i],dimpix,set_rate,cover_chr[j],cover_max[j],dimpix2,max_cover);
            fprintf(namef2,"%ld %lf\n",n_pix+i,dimpix);
-	   if((dimpix > set_rate)||(dimpix2 > 80))
+	   if((dimpix > set_rate)||(dimpix2 > 90))
 	   {
-             fprintf(namef3,"%ld %ld %d %ld %lf\n",j+1,i,idt,n_pix+i,dimpix);
+             fprintf(namef3,"M1 %ld %ld %d %ld %lf\n",j+1,i,idt,n_pix+i,dimpix);
+             printf("M1 %ld %ld %d %ld %lf %d %lf\n",j+1,i,idt,n_pix+i,dimpix,n_meres,dimpix2);
 	     chr_index[n_meres] = j+1;
 	     chr_idpix[n_meres] = i;
 	     chr_locus[n_meres] = idt;
 	     n_meres++;
+	   }
+	   else if((dimpix > set_rate2)&&(dimpix <= set_rate)&&(dimpix2 > 30)&&(dimpix2 <= 90))
+	   {
+             fprintf(namef3,"M2 %ld %ld %d %ld %lf\n",j+1,i,idt,n_pix+i,dimpix);
+             printf("M2 %ld %ld %d %ld %lf %d %lf\n",j+1,i,idt,n_pix+i,dimpix,n_meres2,dimpix2);
+	     chr_index2[n_meres2] = j+1;
+	     chr_idpix2[n_meres2] = i;
+	     chr_locus2[n_meres2] = idt;
+	     n_meres2++;
 	   }
         }
 	n_pix = n_pix + idd;
@@ -920,18 +948,18 @@ void Hash_Process(int nRead,int SEG_LEN, char **argv, int argc, int args)
      free(patch_s_array);
      free(patch_index);
 
-            printf("here1: %d %d\n",nSeq,n_meres);
-     Out_Meres(seq,nSeq,n_meres,chr_index,chr_idpix,chr_locus,argv,argc,args);
+            printf("here1: %d %d %d || %d\n",nSeq,n_meres,n_meres2,n_pixlen);
+     Out_Meres(seq,nSeq,n_meres,n_meres2,chr_index,chr_idpix,chr_locus,chr_index2,chr_idpix2,chr_locus2,argv,argc,args);
      Plot_Process(argv,argc,args);
 
 }
 
 /*   Subroutine to output sequences of centromeres and telomeres   */
 /* =============================================  */
-void Out_Meres(fasta *seq,int nSeq,int n_meres,int *chr_index,int *chr_idpix,int *chr_locus,char **argv, int argc, int args)
+void Out_Meres(fasta *seq,int nSeq,int n_meres,int n_meres2,int *chr_index,int *chr_idpix,int *chr_locus,int *chr_index2,int *chr_idpix2,int *chr_locus2,char **argv, int argc, int args)
 /* =============================================  */
 {
-     int i,j,k,m,n,numMeres,num_hits;
+     int i,j,k,m,n,numMeres,numMeres2,num_hits;
      int stopflag;
      char *st;
      FILE *namef;
@@ -944,6 +972,7 @@ void Out_Meres(fasta *seq,int nSeq,int n_meres,int *chr_index,int *chr_idpix,int
        exit(1);
      }
      numMeres = 0;
+     numMeres2 = 0;
      for(i=0;i<n_meres;i++)
      {
         stopflag=0;
@@ -973,7 +1002,7 @@ void Out_Meres(fasta *seq,int nSeq,int n_meres,int *chr_index,int *chr_idpix,int
 	  }
 	  else
 	  {
-            i_st = chr_locus[i];
+	    i_st = chr_locus[i]-n_pixlen;
 	    i_ed = chr_locus[j-1];  
 	  }
 	  if(i_st <= 0)
@@ -1000,7 +1029,67 @@ void Out_Meres(fasta *seq,int nSeq,int n_meres,int *chr_index,int *chr_idpix,int
           } 
         }
 	i = j-1;
-     }	
+     }
+
+     for(i=0;i<n_meres2;i++)
+        printf("M2: %d %d || %d %d\n",i,chr_index2[i],chr_idpix2[i],chr_locus2[i]);
+     for(i=0;i<n_meres2;i++)
+     {
+        stopflag=0;
+        j=i+1;
+        while((j<n_meres2)&&(stopflag==0))
+        {
+          if((chr_index2[i] == chr_index2[j])&&((chr_idpix2[j]-chr_idpix2[j-1]) <= 3))
+          {
+            j++;
+          }
+          else
+            stopflag=1;
+        }
+        num_hits = j-i;
+        printf("Meres2: %d %d || %d %d || %d %d || %d %d %d\n",chr_index2[j-1],i,chr_idpix2[j-1],chr_idpix2[i],numMeres2,chr_locus2[j-1]-chr_locus2[i],chr_locus2[i],chr_locus2[j-1],num_hits);
+	numMeres2++;
+        if((num_hits >= 10)) 
+        {
+          int i_st,i_ed,nline,seq_len;
+          int set_len  = 100;   
+	  seqp = seq+chr_index2[i]-1;
+
+	  if(num_hits == 1)
+	  {
+            i_st = chr_locus2[i]-n_pixlen;
+	    i_ed = chr_locus2[i];
+	  }
+	  else
+	  {
+            i_st = chr_locus2[i];
+	    i_ed = chr_locus2[j-1];  
+	  }
+	  if(i_st <= 0)
+	    i_st = 1;
+	  if(i_ed > seqp->length)
+	    i_ed = seqp->length;
+
+	  seq_len = i_ed-i_st;
+          nline = seq_len/60;
+          st = seqp->data;
+          if(seq_len>=set_len)
+          {
+            fprintf(namef,">%s_M2_%09d_%09d_%09d_%09d\n",seqp->name,seqp->length,i_st,i_ed,seq_len);
+            for(m=0;m<nline;m++)
+            {
+               for(k=0;k<60;k++,st++)
+                  fprintf(namef,"%c",*st);
+               fprintf(namef,"\n");
+            }
+            for(k=0;k<(seq_len-(nline*60));k++,st++)
+               fprintf(namef,"%c",*st);
+            if(seq_len%60!=0)
+              fprintf(namef,"\n");
+          } 
+        }
+	i = j-1;
+     }
      fclose(namef);
 }
 
