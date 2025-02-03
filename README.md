@@ -18,7 +18,7 @@ Kmeres - Identification of Centromeres and Telomeres using Kmer Profiles
              CHM13v2.fa:   Input genome assembly file 
              meres.fa:     Output centromere sequence file 
 
-#### Test dataset
+### Test dataset:
 
 A test dataset on the T2T gemome assembly of Arabidopsis Thaliana has been put at 
 
@@ -34,11 +34,12 @@ egrep ">" meres.fa
 >Chr4_021578073_004201344_006979392_002778048
 >Chr5_029480885_011829888_014220864_002390976
 
-Chr1:
-chromosome length 32540122
-centromere starts from 14841792
-centromere ends at 17131968
-centromere length 2290176 
+Chr1:                                    \
+chromosome length 32540122               \
+centromere starts from 14841792          \
+centromere ends at 17131968              \
+centromere length 2290176                \ 
+
 
 The centromeres predected by Kmeres are very close to those detected by Chip-seq, see
 
