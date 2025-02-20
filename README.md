@@ -43,8 +43,15 @@ centromere length 2290176                \
 
 The centromeres predected by Kmeres are very close to those detected by Chip-seq, see
 
-Naish M. et al. 2021 "The genetic and epigenetic landscape of the Arabidopsis centromeres". Science. 2021;374:eabi7489. doi: 10.1126/science.abi7489. 
+Naish M. et al. 2021 "The genetic and epigenetic landscape of the Arabidopsis centromeres". Science. 2021;374:eabi7489. doi: 10.1126/science.abi7489. \ 
 
-The users may download the assembly and try it first with a local computer. Then conpare with the output files at the FTP site.
+	The users may download the assembly and try it first with a local computer.   \ 
+	Then conpare with the output files at the FTP site.     \
+	The coverage profile see: Thaliana.png       \
+
+### FTP site for test dataset:
+
+	ftp://ftp.sanger.ac.uk/pub/users/zn1/assembly/Thaliana
+
  
     Please contact Zemin Ning ( zn1@sanger.ac.uk ) for any further information. 
